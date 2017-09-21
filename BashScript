@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo -e "Please enter the desired value for K: "
+read k
+echo "Kicking off our Python program using the value $k as K."
+
+python assignment1.py $k
