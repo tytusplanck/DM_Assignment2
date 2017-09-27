@@ -5,7 +5,7 @@ import math
 import sys
 
 
-def findPosteriorProbability():
+def findPosteriorProbability(proximityAmount):
     return 0
 
 
@@ -195,6 +195,7 @@ def main():
     proximityAmount = int(sys.argv[2])
     data = getCSVData()
     generateApproximationMatrix(k, data)
+    findPosteriorProbability(proximityAmount)
 
 
 if __name__ == "__main__":
