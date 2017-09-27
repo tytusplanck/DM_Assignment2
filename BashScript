@@ -2,6 +2,8 @@
 
 echo -e "Please enter the desired value for K: "
 read k
-echo "Kicking off our Python program using the value $k as K."
+echo -e "Please enter the desired amount of records to compare to in proximity measurements: "
+read $p
+echo "Kicking off our Python program using the value $k as K and $p measurements."
 
-python assignment1.py $k
+python assignment1.py $k $p

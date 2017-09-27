@@ -192,6 +192,7 @@ def printResults(results):
 
 def main():
     k = int(sys.argv[1])
+    proximityAmount = int(sys.argv[2])
     data = getCSVData()
     generateApproximationMatrix(k, data)
 
