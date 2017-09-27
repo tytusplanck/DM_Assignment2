@@ -5,7 +5,10 @@ import math
 import sys
 
 
-# Function Definition for getCSVData
+def findPosteriorProbability():
+    return 0
+
+
 def getCSVData():
     data = []
     with open('income_tr.csv', 'rb') as csvfile:
