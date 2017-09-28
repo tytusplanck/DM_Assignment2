@@ -6,20 +6,21 @@ import sys
 
 
 # Manages the entire posterior matrix that compares each TE row to our training set.
-def createPosteriorMatrix(trData, teData, proximityAmount, k):
+def createProximityTEMatrix(trData, teData, proximityAmount, k):
     index = 1
     posteriorMatrix = []
     while index < len(teData):
-        newRow = findOnePosteriorProbability(
+        newRow = findOneProximityTERow(
             trData, teData[index], proximityAmount, k)
         posteriorMatrix.append(newRow)
         index = index + 1
     printResults(posteriorMatrix)
+    # TODO need formatting for giving all info and proximity measurements (class and stuff)
     return posteriorMatrix
 
 
 # Finds the proximity amount of rows that relate to the given income_te row. Passes an array back.
-def findOnePosteriorProbability(trData, teRow, proximityAmount, k):
+def findOneProximityTERow(trData, teRow, proximityAmount, k):
     posteriorRow = []
     index = 1
     approximationMatrix = []
@@ -30,7 +31,12 @@ def findOnePosteriorProbability(trData, teRow, proximityAmount, k):
         index = index + 1
     # need to make a new method to get our results out should just print out one row.
     # resultsMatrix = getFormattedResults(approximationMatrix, k)
+    posteriorRow = getFormattedProximityTERow(approximationMatrix)
     return posteriorRow
+
+
+def getFormattedProximityTERow(approximationMatrix):
+    return []
 
 
 # Gets the data from income_tr
@@ -234,7 +240,7 @@ def main():
     trData = getTRCSVData()
     teData = getTECSVData()
     generateApproximationMatrix(k, trData)
-    createPosteriorMatrix(trData, teData, proximityAmount, k)
+    createProximityTEMatrix(trData, teData, proximityAmount, k)
 
 
 if __name__ == "__main__":
