@@ -1,15 +1,46 @@
-# Assignment 1 - Data Mining
+# Assignment 2 - Data Mining
 # Tytus Planck and Kyle Rossman
 import csv
 import math
 import sys
 
 
-def findPosteriorProbability():
-    return 0
+# Manages the entire posterior matrix that compares each TE row to our training set.
+def createProximityTEMatrix(trData, teData, proximityAmount, k):
+    index = 1
+    posteriorMatrix = []
+    while index < len(teData):
+        newRow = findOneProximityTERow(
+            trData, teData[index], proximityAmount, k)
+        posteriorMatrix.append(newRow)
+        index = index + 1
+    printResults(posteriorMatrix)
+    # TODO need formatting for giving all info and proximity measurements (class and stuff)
+    return posteriorMatrix
 
 
-def getCSVData():
+# Finds the proximity amount of rows that relate to the given income_te row. Passes an array back.
+def findOneProximityTERow(trData, teRow, proximityAmount, k):
+    posteriorRow = []
+    index = 1
+    approximationMatrix = []
+    resultsMatrix = []
+    newMatrix = trData.append(teRow)
+    while index < len(newMatrix):
+        approximationMatrix.append(approximateOneInstance(newMatrix, index))
+        index = index + 1
+    # need to make a new method to get our results out should just print out one row.
+    # resultsMatrix = getFormattedResults(approximationMatrix, k)
+    posteriorRow = getFormattedProximityTERow(approximationMatrix)
+    return posteriorRow
+
+
+def getFormattedProximityTERow(approximationMatrix):
+    return []
+
+
+# Gets the data from income_tr
+def getTRCSVData():
     data = []
     with open('income_tr.csv', 'rb') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',', quotechar='|')
@@ -19,6 +50,19 @@ def getCSVData():
                 dataRow.append(item)
             data.append(dataRow)
     return data
+
+
+# Gets the data from income_te
+def getTECSVData():
+    teData = []
+    with open('income_te.csv', 'rb') as csvfile:
+        csvreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        for row in csvreader:
+            dataRow = []
+            for item in row:
+                dataRow.append(item)
+            teData.append(dataRow)
+    return teData
 
 
 # Function Definition for generateApproximationMatrix
@@ -266,8 +310,10 @@ def determineClassStats(neighbors):
 def main():
     k = int(sys.argv[1])
     proximityAmount = int(sys.argv[2])
-    data = getCSVData()
-    generateApproximationMatrix(k, data)
+    trData = getTRCSVData()
+    teData = getTECSVData()
+    generateApproximationMatrix(k, trData)
+    createProximityTEMatrix(trData, teData, proximityAmount, k)
 
 
 if __name__ == "__main__":
