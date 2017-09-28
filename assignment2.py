@@ -8,12 +8,9 @@ start_time = time.time()
 
 
 # Manages the entire posterior matrix that compares each TE row to our training set.
-def createProximityTEMatrix(trData, teData, k):
+def createProximityTEMatrix(combinedMatrix, k):
     index = 1
     combinedApproximationMatrix = []
-    combinedMatrix = trData[:]
-    combinedMatrix += teData[:]
-    printResults(combinedMatrix, "combinedwithheader.csv")
     while index < len(combinedMatrix):
         combinedApproximationMatrix.append(
             approximateOneInstance(combinedMatrix, index))
@@ -21,7 +18,7 @@ def createProximityTEMatrix(trData, teData, k):
     resultApproximationMatrix = getFormattedCombinedResultsRow(
         combinedApproximationMatrix, k)
     printResults(resultApproximationMatrix, "formatted_rows.csv")
-    return combinedApproximationMatrix
+    return resultApproximationMatrix
 
 
 # Gets the data from income_tr
@@ -176,12 +173,21 @@ def getFormattedCombinedResultsRow(approximationMatrix, k):
         sortedRow = approximationMatrix[outerCounter][:]
         sortedRow.sort()
         IDList = []
+        # counter = 0
+        # while len(IDList) < k:
+        #     x = 0
+        #     while x < len(sortedRow):  # has the proximities but nothing else
+        #         # has to compare proximity to each column and returns the position in array once it finds a match
+        #         if sortedRow[counter] == approximationMatrix[outerCounter][x] and x < 520:
+        #             IDList.append(x)
+        #         x = x + 1
+        #     counter = counter + 1
         counter = 0
         while len(IDList) < k:
             x = 0
             while x < len(sortedRow):  # has the proximities but nothing else
-                # has to compare proximity to each column and returns the position in array wants it find a match
-                if sortedRow[counter] == approximationMatrix[outerCounter][x] and x < 520:
+                # has to compare proximity to each column and returns the position in array once it finds a match
+                if sortedRow[counter] == approximationMatrix[outerCounter][x] and x < 520 and sortedRow[counter] != 0:
                     IDList.append(x)
                 x = x + 1
             counter = counter + 1
@@ -197,10 +203,14 @@ def getFormattedCombinedResultsRow(approximationMatrix, k):
     return results
 
 
-def getTEMatrix(rowIndex, formattedProximityMatrix, combinedMatrix, k):
+def getNeighbors(rowIndex, formattedProximityMatrix, combinedMatrix, k):
     teMatrix = []
     x = 0
-    # while x < k:
+    while x < k + 1:
+        newRowIndex = formattedProximityMatrix[rowIndex][x]
+        teMatrix.append(combinedMatrix[newRowIndex])
+        print(combinedMatrix[newRowIndex])
+        x = x + 1
     printResults(teMatrix, "teMatrix.csv")
     return teMatrix
 
@@ -212,23 +222,26 @@ def printResults(results, name):
         writer.writerows(results)
 
 
-def performKNN(k, testSet):
+def performKNN(formattedProximityMatrix, combinedMatrix, k):
     KNNStats = []
     predictions = []
     posteriorProbabilityA = []
     posteriorProbabilityB = []
+    neighbors = []
+    index = 520
 
-    while index < len(testSet):
-        neigbors - getNeighbors(k, index)
-        kNNStats.append(determineClassStats(neighbors))
-        predictions.append(kNNStats[index][0])
+    while index < len(formattedProximityMatrix):
+        neigbors = getNeighbors(
+            index, formattedProximityMatrix, combinedMatrix, k)
+        KNNStats.append(determineClassStats(neighbors))
+        predictions.append(KNNStats[index][0])
         index = index + 1
 
     percentPredictedBelow50 = getPercentPredicted(predictions, "<=50K")  # p(x)
     percentPredictedAbove50 = getPercentPredicted(predictions, ">50K")
 
-    probPriorsAbove = getPriors(testSet, ">50K")
-    probPriorsBelow = getPriors(testSet, "<=50K")
+    probPriorsAbove = getPriors(formattedProximityMatrix, ">50K")
+    probPriorsBelow = getPriors(formattedProximityMatrix, "<=50K")
 
     counter = 0
     while (counter < len(predictions)):
@@ -241,12 +254,12 @@ def performKNN(k, testSet):
         counter = counter + 1
 
 
-def getPriors(testSet, str):
+def getPriors(formattedProximityMatrix, str):
     correct = 0
     total = 0
-    index = 0
-    while (index < len(testSet)):
-        if (testSet[index] == str):
+    index = 520
+    while (index < len(formattedProximityMatrix)):
+        if (formattedProximityMatrix[index] == str):
             correct = correct + 1
             total = total + 1
         else:
@@ -290,8 +303,13 @@ def main():
     k = int(sys.argv[1])
     trData = getTRCSVData()
     teData = getTECSVData()
+    combinedApproximationMatrix = []
+    combinedMatrix = trData[:]
+    combinedMatrix += teData[1:]
+    printResults(combinedMatrix, "combinedwithheader.csv")
     generateApproximationMatrix(k, trData)
-    createProximityTEMatrix(trData, teData[1:], k)
+    proximityTEMatrix = createProximityTEMatrix(combinedMatrix, k)
+    performKNN(proximityTEMatrix, combinedMatrix, k)
     print("Our program took %s seconds to complete" %
           (time.time() - start_time))
 
