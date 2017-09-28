@@ -3,47 +3,33 @@
 import csv
 import math
 import sys
+import time
+start_time = time.time()
 
 
 # Manages the entire posterior matrix that compares each TE row to our training set.
-def createProximityTEMatrix(trData, teData, proximityAmount, k):
+def createProximityTEMatrix(trData, teData, k):
     index = 1
-    posteriorMatrix = []
-    while index < len(teData):
-        newRow = findOneProximityTERow(
-            trData, teData[index], proximityAmount, k)
-        posteriorMatrix.append(newRow)
+    combinedApproximationMatrix = []
+    combinedMatrix = trData[:]
+    combinedMatrix += teData[:]
+    printResults(combinedMatrix, "combinedwithheader.csv")
+    # printResults(combinedMatrix, "combined_matrix.csv")
+    while index < len(combinedMatrix):
+        combinedApproximationMatrix.append(
+            approximateOneInstance(combinedMatrix, index))
         index = index + 1
-    printResults(posteriorMatrix)
-    # TODO need formatting for giving all info and proximity measurements (class and stuff)
-    return posteriorMatrix
-
-
-# Finds the proximity amount of rows that relate to the given income_te row. Passes an array back.
-def findOneProximityTERow(trData, teRow, proximityAmount, k):
-    posteriorRow = []
-    index = 1
-    approximationMatrix = []
-    resultsMatrix = []
-    newMatrix = trData.append(teRow)
-    while index < len(newMatrix):
-        approximationMatrix.append(approximateOneInstance(newMatrix, index))
-        index = index + 1
-    # need to make a new method to get our results out should just print out one row.
-    # resultsMatrix = getFormattedResults(approximationMatrix, k)
-    posteriorRow = getFormattedProximityTERow(approximationMatrix)
-    return posteriorRow
-
-
-def getFormattedProximityTERow(approximationMatrix):
-    return []
+    resultApproximationMatrix = getFormattedCombinedResultsRow(
+        combinedApproximationMatrix, k)
+    printResults(resultApproximationMatrix, "formatted_rows.csv")
+    return combinedApproximationMatrix
 
 
 # Gets the data from income_tr
 def getTRCSVData():
     data = []
     with open('income_tr.csv', 'rb') as csvfile:
-        csvreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
         for row in csvreader:
             dataRow = []
             for item in row:
@@ -56,7 +42,7 @@ def getTRCSVData():
 def getTECSVData():
     teData = []
     with open('income_te.csv', 'rb') as csvfile:
-        csvreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        csvreader = csv.reader(csvfile, delimiter=',', quotechar='"')
         for row in csvreader:
             dataRow = []
             for item in row:
@@ -74,8 +60,6 @@ def generateApproximationMatrix(k, data):
     while index < len(data):
         approximationMatrix.append(approximateOneInstance(data, index))
         index = index + 1
-    resultsMatrix = getFormattedResults(approximationMatrix, k)
-    printResults(resultsMatrix)
     return approximationMatrix  # returns array of approximations for each
 
 
@@ -186,61 +170,58 @@ def getJaccardProximation(row1, row2):
     return jaccard
 
 
-# Function Definition for getFormattedResults
-def getFormattedResults(approximationMatrix, k):
+def getFormattedCombinedResultsRow(approximationMatrix, k):
     results = []
-    header = ["Transaction ID"]
-    count = 1
-    while count <= k:
-        header.append(count)
-        header.append("prox")
-        count = count + 1
-    results.append(header)
     outerCounter = 0
     while outerCounter < len(approximationMatrix):
-
         sortedRow = approximationMatrix[outerCounter][:]
         sortedRow.sort()
-        sizeKRow = []
         IDList = []
-        kIndex = 0
-        while kIndex < k:
-            # doing plus one will exclude the proximation to itself
-            sizeKRow.append(sortedRow[kIndex + 1])
-            kIndex = kIndex + 1
         counter = 0
-        while counter < len(sizeKRow):
+        while len(IDList) < k:
             x = 0
-            while x < len(sortedRow):
-                if sizeKRow[counter] == approximationMatrix[outerCounter][x]:
+            while x < len(sortedRow):  # has the proximities but nothing else
+                # has to compare proximity to each column and returns the position in array wants it find a match
+                if sortedRow[counter] == approximationMatrix[outerCounter][x] and x < 520:
                     IDList.append(x)
                 x = x + 1
             counter = counter + 1
         y = 0
         singleResultsRow = [outerCounter + 1]
         while y < len(IDList):
+            # adds one to take into account the header row. Is appending the ID
             singleResultsRow.append(IDList[y] + 1)
-            singleResultsRow.append(sizeKRow[y])
             y = y + 1
+        # appends that array into the array of arrays
         results.append(singleResultsRow)
         outerCounter = outerCounter + 1
     return results
 
 
-def printResults(results):
+def getTEMatrix(rowIndex, formattedProximityMatrix, combinedMatrix, k):
+    teMatrix = []
+    x = 0
+    while x < k:
+
+    printResults(teMatrix, "teMatrix.csv")
+    return teMatrix
+
+
+def printResults(results, name):
     # Outputs the results calculated to a CSV file.
-    with open("output.csv", "wb") as f:
+    with open(name, "wb") as f:
         writer = csv.writer(f)
         writer.writerows(results)
 
 
 def main():
     k = int(sys.argv[1])
-    proximityAmount = int(sys.argv[2])
     trData = getTRCSVData()
     teData = getTECSVData()
     generateApproximationMatrix(k, trData)
-    createProximityTEMatrix(trData, teData, proximityAmount, k)
+    createProximityTEMatrix(trData, teData[1:], k)
+    print("Our program took %s seconds to complete" %
+          (time.time() - start_time))
 
 
 if __name__ == "__main__":
