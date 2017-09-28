@@ -205,11 +205,10 @@ def getFormattedCombinedResultsRow(approximationMatrix, k):
 
 def getNeighbors(rowIndex, formattedProximityMatrix, combinedMatrix, k):
     teMatrix = []
-    x = 0
+    x = 1
     while x < k + 1:
         newRowIndex = formattedProximityMatrix[rowIndex][x]
         teMatrix.append(combinedMatrix[newRowIndex])
-        print(combinedMatrix[newRowIndex])
         x = x + 1
     printResults(teMatrix, "teMatrix.csv")
     return teMatrix
