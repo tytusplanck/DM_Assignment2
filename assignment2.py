@@ -1,15 +1,40 @@
-# Assignment 1 - Data Mining
+# Assignment 2 - Data Mining
 # Tytus Planck and Kyle Rossman
 import csv
 import math
 import sys
 
 
-def findPosteriorProbability(proximityAmount):
-    return 0
+# Manages the entire posterior matrix that compares each TE row to our training set.
+def createPosteriorMatrix(trData, teData, proximityAmount, k):
+    index = 1
+    posteriorMatrix = []
+    while index < len(teData):
+        newRow = findOnePosteriorProbability(
+            trData, teData[index], proximityAmount, k)
+        posteriorMatrix.append(newRow)
+        index = index + 1
+    printResults(posteriorMatrix)
+    return posteriorMatrix
 
 
-def getCSVData():
+# Finds the proximity amount of rows that relate to the given income_te row. Passes an array back.
+def findOnePosteriorProbability(trData, teRow, proximityAmount, k):
+    posteriorRow = []
+    index = 1
+    approximationMatrix = []
+    resultsMatrix = []
+    newMatrix = trData.append(teRow)
+    while index < len(newMatrix):
+        approximationMatrix.append(approximateOneInstance(newMatrix, index))
+        index = index + 1
+    # need to make a new method to get our results out should just print out one row.
+    # resultsMatrix = getFormattedResults(approximationMatrix, k)
+    return posteriorRow
+
+
+# Gets the data from income_tr
+def getTRCSVData():
     data = []
     with open('income_tr.csv', 'rb') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',', quotechar='|')
@@ -19,6 +44,19 @@ def getCSVData():
                 dataRow.append(item)
             data.append(dataRow)
     return data
+
+
+# Gets the data from income_te
+def getTECSVData():
+    teData = []
+    with open('income_te.csv', 'rb') as csvfile:
+        csvreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        for row in csvreader:
+            dataRow = []
+            for item in row:
+                dataRow.append(item)
+            teData.append(dataRow)
+    return teData
 
 
 # Function Definition for generateApproximationMatrix
@@ -193,9 +231,10 @@ def printResults(results):
 def main():
     k = int(sys.argv[1])
     proximityAmount = int(sys.argv[2])
-    data = getCSVData()
-    generateApproximationMatrix(k, data)
-    findPosteriorProbability(proximityAmount)
+    trData = getTRCSVData()
+    teData = getTECSVData()
+    generateApproximationMatrix(k, trData)
+    createPosteriorMatrix(trData, teData, proximityAmount, k)
 
 
 if __name__ == "__main__":
