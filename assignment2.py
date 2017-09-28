@@ -14,7 +14,6 @@ def createProximityTEMatrix(trData, teData, k):
     combinedMatrix = trData[:]
     combinedMatrix += teData[:]
     printResults(combinedMatrix, "combinedwithheader.csv")
-    # printResults(combinedMatrix, "combined_matrix.csv")
     while index < len(combinedMatrix):
         combinedApproximationMatrix.append(
             approximateOneInstance(combinedMatrix, index))
@@ -201,8 +200,7 @@ def getFormattedCombinedResultsRow(approximationMatrix, k):
 def getTEMatrix(rowIndex, formattedProximityMatrix, combinedMatrix, k):
     teMatrix = []
     x = 0
-    while x < k:
-
+    # while x < k:
     printResults(teMatrix, "teMatrix.csv")
     return teMatrix
 
@@ -213,20 +211,20 @@ def printResults(results, name):
         writer = csv.writer(f)
         writer.writerows(results)
 
+
 def performKNN(k, testSet):
-    kNNStats = [] #predictedClass, localProbA, localProbB
+    KNNStats = []
     predictions = []
     posteriorProbabilityA = []
     posteriorProbabilityB = []
-    index = 0
-    
+
     while index < len(testSet):
-        neighbors = getNeighbors(k, testSet[index])
+        neigbors - getNeighbors(k, index)
         kNNStats.append(determineClassStats(neighbors))
         predictions.append(kNNStats[index][0])
         index = index + 1
-    
-    percentPredictedBelow50 = getPercentPredicted(predictions, "<=50K") #p(x)
+
+    percentPredictedBelow50 = getPercentPredicted(predictions, "<=50K")  # p(x)
     percentPredictedAbove50 = getPercentPredicted(predictions, ">50K")
 
     probPriorsAbove = getPriors(testSet, ">50K")
@@ -234,9 +232,13 @@ def performKNN(k, testSet):
 
     counter = 0
     while (counter < len(predictions)):
-        posteriorProbabilityA.append(kNNStats[1] * probPriorsAbove / float(percentPredictedAbove50))
-        posteriorProbabilityB.append(kNNStats[2] * probPriorsBelow / float(percentPredictedBelow50))
-
+        posteriorProbabilityA.append(
+            kNNStats[1] * probPriorsAbove / float(percentPredictedAbove50))
+        posteriorProbabilityB.append(
+            kNNStats[2] * probPriorsBelow / float(percentPredictedBelow50))
+        posteriorProbabilityB.append(
+            kNNStats[2] * probPriorsBelow / float(percentPredictedBelow50))
+        counter = counter + 1
 
 
 def getPriors(testSet, str):
@@ -250,8 +252,8 @@ def getPriors(testSet, str):
         else:
             total = total + 1
     return correct / float(total)
- 
-#p(x)
+
+
 def getPercentPredicted(predictions, str):
     total = 0
     correct = 0
@@ -266,10 +268,7 @@ def getPercentPredicted(predictions, str):
     return float(correct) / float(total)
 
 
-
-
 def determineClassStats(neighbors):
-
     above50 = 0
     below50 = 0
     index = 0
@@ -279,12 +278,12 @@ def determineClassStats(neighbors):
             below50 = below50 + 1
         else:
             above50 = above50 + 1
-        index = index + 1
+        predicion = ">50K"
     if above50 > below50:
-        predicion =  ">50K"
+        predicion = ">50K"
     probA = float(above50) / (float(above50) + float(below50))
     probB = float(below50) / (float(above50) + float(below50))
-    return [prediction, probA, probB] #probA and probB helps with P(x/+)
+    return [prediction, probA, probB]  # probA and probB helps with P(x/+)
 
 
 def main():
