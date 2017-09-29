@@ -258,9 +258,9 @@ def performKNN(formattedProximityMatrix, combinedMatrix, k):
         #print(KNNStats[counter][2])
         #print(probPriorsAbove)
         posteriorProbabilityA.append(KNNStats[counter][1] * probPriorsAbove / float(percentPredictedAbove50))
-        #print(KNNStats[counter][2])
-        #print (probPriorsBelow)
-        #print (percentPredictedBelow50)
+        print(KNNStats[counter][2])
+        print (probPriorsBelow)
+        print (percentPredictedBelow50)
         posteriorProbabilityB.append(KNNStats[counter][2] * probPriorsBelow / float(percentPredictedBelow50))
         counter = counter + 1
     print("finishes while loop")
