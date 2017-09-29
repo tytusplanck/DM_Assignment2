@@ -232,14 +232,17 @@ def performKNN(formattedProximityMatrix, combinedMatrix, k):
     while index < len(formattedProximityMatrix):
         neighbors = []
         knnIndex = 0
-        neighbors += getNeighbors(
+        neighbors = getNeighbors(
             index, formattedProximityMatrix, combinedMatrix, k)
         KNNStats.append(determineClassStats(neighbors))
+        #print(neighbors) is working
         #print(len(KNNStats))
         predictions.append(KNNStats[knnIndex][0])
         index = index + 1
         knnIndex = knnIndex + 1
 
+   # print(KNNStats)
+    #print(predictions)
     percentPredictedBelow50 = getPercentPredicted(predictions, "<=50K")  # p(x)
     percentPredictedAbove50 = getPercentPredicted(predictions, ">50K")
 
@@ -299,10 +302,10 @@ def getPercentPredicted(predictions, str):
     correct = 0
     index = 0
     while index < len(predictions):
-        print(predictions[index])
-        print(str)
-        print("___")
-        if predictions[index] == str:
+        #print(predictions[index])
+        #print(str)
+        #print("___")
+        if (predictions[index] == str):
             correct = correct + 1
             total = total + 1
         else:
@@ -315,24 +318,25 @@ def determineClassStats(neighbors):
     above50 = 0
     below50 = 0
     index = 0
-    prediction = "<=50K"
-    #print(len(neighbors))
+    prediction = '<=50K'
+    #print(len(neighbors)) works
     while index < len(neighbors):
-        #print(neighbors[index][15])
-        if (neighbors[index][15] == "<=50K"):
+        #print(neighbors[index][15]) is diverse like it should be
+        if (neighbors[index][15] == '<=50K'):
             below50 = below50 + 1
+            print(below50)
         else:
             above50 = above50 + 1
-        predicion = ">50K"
+            prediction = '>50K'
         index = index + 1
     #print("above 50")
     #print(above50)
     #print("below 50")
     #print(below50)
     if (above50 > below50):
-        predicion = ">50K"
-    probA = float(above50) / (float(above50) + float(below50))
-    probB = float(below50) / (float(above50) + float(below50))
+        prediction = '>50K'
+    probA = float(above50) / (float(above50 + below50))
+    probB = float(below50) / (float(above50 + below50))
     return [prediction, probA, probB]  # probA and probB helps with P(x/+)
 
 
