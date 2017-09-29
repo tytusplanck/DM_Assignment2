@@ -228,10 +228,10 @@ def performKNN(formattedProximityMatrix, combinedMatrix, k):
     posteriorProbabilityA = []
     posteriorProbabilityB = []
     index = 520
+    knnIndex = 0
 
     while index < len(formattedProximityMatrix):
         neighbors = []
-        knnIndex = 0
         neighbors = getNeighbors(
             index, formattedProximityMatrix, combinedMatrix, k)
         KNNStats.append(determineClassStats(neighbors))
@@ -241,25 +241,29 @@ def performKNN(formattedProximityMatrix, combinedMatrix, k):
         index = index + 1
         knnIndex = knnIndex + 1
 
-   # print(KNNStats)
+    #print(KNNStats)
     #print(predictions)
-    percentPredictedBelow50 = getPercentPredicted(predictions, "<=50K")  # p(x)
-    percentPredictedAbove50 = getPercentPredicted(predictions, ">50K")
+    percentPredictedBelow50 = getPercentPredicted(predictions, '<=50K ')  # p(x)
+    percentPredictedAbove50 = getPercentPredicted(predictions, '>50K ')
+    #print(percentPredictedAbove50)
 
-    probPriorsAbove = getPriors(formattedProximityMatrix, ">50K")
-    probPriorsBelow = getPriors(formattedProximityMatrix, "<=50K")
+    probPriorsAbove = getPriors(combinedMatrix, '>50K ')
+    probPriorsBelow = getPriors(combinedMatrix, '<=50K ')
+    #print(probPriorsBelow)
 
     counter = 0
     while (counter < len(predictions)):
         #print(percentPredictedAbove50)
         #print(percentPredictedBelow50)
-        #print(KNNStats[counter][1])
+        #print(KNNStats[counter][2])
         #print(probPriorsAbove)
         posteriorProbabilityA.append(KNNStats[counter][1] * probPriorsAbove / float(percentPredictedAbove50))
-        #print(KNNStats[1])
+        #print(KNNStats[counter][2])
+        #print (probPriorsBelow)
+        #print (percentPredictedBelow50)
         posteriorProbabilityB.append(KNNStats[counter][2] * probPriorsBelow / float(percentPredictedBelow50))
         counter = counter + 1
-
+    print("finishes while loop")
     generateOutput(combinedMatrix, predictions, posteriorProbabilityA, posteriorProbabilityB)
 
     
@@ -268,16 +272,21 @@ def generateOutput(combinedMatrix, predictions, posteriorProbabilityA, posterior
     outputMatrix = []
     idInOutput = 1
     index = 520
-    while (index < len(combinedMatrix)):
+    priorsIndex = 0
+    while (index < len(combinedMatrix) - 1): #just added minus one for test
+        #print(priorsIndex)
         outputRow = []
-        posteriorSelection = posteriorProbabilityB
+        posteriorSelection = posteriorProbabilityB[priorsIndex]
         outputRow.append(idInOutput)
         outputRow.append(combinedMatrix[index][15])
         outputRow.append(predictions[idInOutput - 1]) #this is because idInOutput starts at 1
-        if (predictions[idInOutput - 1] == ">50K"):
-            posteriorSelection = posteriorProbabilityA
-        outputRow.append(posteriorProbabilityA)
+        if (len(predictions[idInOutput - 1]) == len('>50K ')):
+            posteriorSelection = posteriorProbabilityA[priorsIndex]
+        outputRow.append(posteriorSelection)
         outputMatrix.append(outputRow)
+        index = index + 1
+        priorsIndex = priorsIndex + 1
+        idInOutput = idInOutput + 1
     printResults(outputMatrix, "Pleasework.csv")
 
 
@@ -287,7 +296,8 @@ def getPriors(combinedMatrix, str):
     total = 0
     index = 520
     while (index < 808):
-        if (combinedMatrix[index] == str):
+        #print(combinedMatrix[index][15]) gives right value
+        if (len(combinedMatrix[index][15]) == len(str)):
             correct = correct + 1
             total = total + 1
         else:
@@ -297,15 +307,16 @@ def getPriors(combinedMatrix, str):
     return correct / float(total)
 
 
-def getPercentPredicted(predictions, str):
+def getPercentPredicted(predictions, str): 
     total = 0
     correct = 0
     index = 0
+    #print(predictions)
     while index < len(predictions):
         #print(predictions[index])
         #print(str)
         #print("___")
-        if (predictions[index] == str):
+        if (len(predictions[index]) == len(str)):
             correct = correct + 1
             total = total + 1
         else:
@@ -318,23 +329,27 @@ def determineClassStats(neighbors):
     above50 = 0
     below50 = 0
     index = 0
-    prediction = '<=50K'
+    prediction = '<=50K '
     #print(len(neighbors)) works
     while index < len(neighbors):
-        #print(neighbors[index][15]) is diverse like it should be
-        if (neighbors[index][15] == '<=50K'):
+        #print((neighbors[index][15]) + 'sd')
+        #print(len(neighbors[index][15])) #is diverse like it should be
+        #print(('<=50K'))
+        #print(len('<=50K'))
+        #print("__")
+        if (len(neighbors[index][15]) == len('<=50K ')):
             below50 = below50 + 1
-            print(below50)
+            #print(below50) #this never runs
         else:
             above50 = above50 + 1
-            prediction = '>50K'
+            prediction = '>50K '
         index = index + 1
     #print("above 50")
     #print(above50)
     #print("below 50")
     #print(below50)
     if (above50 > below50):
-        prediction = '>50K'
+        prediction = '>50K '
     probA = float(above50) / (float(above50 + below50))
     probB = float(below50) / (float(above50 + below50))
     return [prediction, probA, probB]  # probA and probB helps with P(x/+)
