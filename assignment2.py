@@ -243,8 +243,8 @@ def performKNN(formattedProximityMatrix, combinedMatrix, k):
 
     #print(KNNStats)
     #print(predictions)
-    percentPredictedBelow50 = getPercentPredicted(predictions, '<=50K ')  # p(x)
-    percentPredictedAbove50 = getPercentPredicted(predictions, '>50K ')
+    percentPredictedBelow50 = getPercentPredicted(predictions, combinedMatrix, '<=50K ')  # p(x)
+    percentPredictedAbove50 = getPercentPredicted(predictions, combinedMatrix, '>50K ')
     #print(percentPredictedAbove50)
 
     probPriorsAbove = getPriors(combinedMatrix, '>50K ')
@@ -306,23 +306,23 @@ def getPriors(combinedMatrix, str):
         #print(index)
     return correct / float(total)
 
-
-def getPercentPredicted(predictions, str): 
-    total = 0
-    correct = 0
+#needs to take the number of times you guessed the correct class divided
+def getPercentPredicted(predictions, combinedMatrix, str): 
+    totalGuesses = 0
+    correctGuess = 0
     index = 0
     #print(predictions)
     while index < len(predictions):
         #print(predictions[index])
         #print(str)
         #print("___")
-        if (len(predictions[index]) == len(str)):
-            correct = correct + 1
-            total = total + 1
-        else:
-            total = total + 1
+        if (len(predictions[index]) == len(str) and len(predictions[index]) == len(combinedMatrix[index + 520][15])):
+            correctGuess = correctGuess + 1
+            totalGuesses = totalGuesses + 1
+        elif (len(predictions[index]) == len(str)):
+            totalGuesses = totalGuesses + 1
         index = index + 1
-    return float(correct) / float(total)
+    return float(correctGuess) / float(totalGuesses)
 
 
 def determineClassStats(neighbors):
