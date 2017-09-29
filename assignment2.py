@@ -344,6 +344,9 @@ def determineClassStats(neighbors):
             above50 = above50 + 1
             prediction = '>50K '
         index = index + 1
+
+
+    
     #print("above 50")
     #print(above50)
     #print("below 50")
