@@ -241,6 +241,7 @@ def performKNN(formattedProximityMatrix, combinedMatrix, k):
         index = index + 1
         knnIndex = knnIndex + 1
 
+    confusion(combinedMatrix, predictions)
     #print(KNNStats)
     #print(predictions)
     percentPredictedBelow50 = getPercentPredicted(predictions, combinedMatrix, '<=50K ')  # p(x)
@@ -258,12 +259,12 @@ def performKNN(formattedProximityMatrix, combinedMatrix, k):
         #print(KNNStats[counter][2])
         #print(probPriorsAbove)
         posteriorProbabilityA.append(KNNStats[counter][1] * probPriorsAbove / float(percentPredictedAbove50))
-        print(KNNStats[counter][2])
-        print (probPriorsBelow)
-        print (percentPredictedBelow50)
+        #print(KNNStats[counter][2])
+        #print (probPriorsBelow)
+        #print (percentPredictedBelow50)
         posteriorProbabilityB.append(KNNStats[counter][2] * probPriorsBelow / float(percentPredictedBelow50))
         counter = counter + 1
-    print("finishes while loop")
+    #print("finishes while loop")
     generateOutput(combinedMatrix, predictions, posteriorProbabilityA, posteriorProbabilityB)
 
     
@@ -287,7 +288,7 @@ def generateOutput(combinedMatrix, predictions, posteriorProbabilityA, posterior
         index = index + 1
         priorsIndex = priorsIndex + 1
         idInOutput = idInOutput + 1
-    printResults(outputMatrix, "Pleasework.csv")
+    printResults(outputMatrix, "ClassificationOutput.csv")
 
 
 #needs actual percentage of the particular class in Training data
@@ -311,11 +312,7 @@ def getPercentPredicted(predictions, combinedMatrix, str):
     totalGuesses = 0
     correctGuess = 0
     index = 0
-    #print(predictions)
     while index < len(predictions):
-        #print(predictions[index])
-        #print(str)
-        #print("___")
         if (len(predictions[index]) == len(str) and len(predictions[index]) == len(combinedMatrix[index + 520][15])):
             correctGuess = correctGuess + 1
             totalGuesses = totalGuesses + 1
@@ -332,31 +329,42 @@ def determineClassStats(neighbors):
     prediction = '<=50K '
     #print(len(neighbors)) works
     while index < len(neighbors):
-        #print((neighbors[index][15]) + 'sd')
-        #print(len(neighbors[index][15])) #is diverse like it should be
-        #print(('<=50K'))
-        #print(len('<=50K'))
-        #print("__")
+
         if (len(neighbors[index][15]) == len('<=50K ')):
             below50 = below50 + 1
             #print(below50) #this never runs
         else:
             above50 = above50 + 1
-            prediction = '>50K '
         index = index + 1
 
-
-    
-    #print("above 50")
-    #print(above50)
-    #print("below 50")
-    #print(below50)
     if (above50 > below50):
         prediction = '>50K '
     probA = float(above50) / (float(above50 + below50))
     probB = float(below50) / (float(above50 + below50))
-    return [prediction, probA, probB]  # probA and probB helps with P(x/+)
+    return [prediction, probA, probB]  # The prediction is accompanied with the proportions of each guess in relation to the class
 
+def confusion(combinedMatrix, predictions):
+    falsePositive = 0
+    truePositive = 0
+    trueNegative = 0
+    falseNegative = 0
+    counter = 520
+    predIndex = 0
+    while (counter < 808):
+        if (len(combinedMatrix[counter][15]) == len(predictions[predIndex]) and len(predictions[predIndex]) == len('>50K ')):
+            truePositive = truePositive + 1
+        elif (len(combinedMatrix[counter][15]) == len(predictions[predIndex]) and len(predictions[predIndex]) == len('<=50K ')):
+            trueNegative = trueNegative + 1
+        elif (len(combinedMatrix[counter][15]) != len(predictions[predIndex]) and len(predictions[predIndex]) == len('>50K ')):
+            falsePositive = falsePositive + 1
+        elif (len(combinedMatrix[counter][15]) != len(predictions[predIndex]) and len(predictions[predIndex]) == len('<=50K ')):
+            falseNegative = falseNegative + 1
+        counter = counter + 1
+        predIndex = predIndex + 1
+    #print(truePositive)
+    #print(trueNegative)
+    #print(falseNegative)
+    #print(falsePositive)
 
 def main():
     k = int(sys.argv[1])
