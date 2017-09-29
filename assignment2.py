@@ -211,6 +211,7 @@ def getNeighbors(rowIndex, formattedProximityMatrix, combinedMatrix, k):
         teMatrix.append(combinedMatrix[newRowIndex])
         x = x + 1
     printResults(teMatrix, "teMatrix.csv")
+    #print(len(teMatrix))
     return teMatrix
 
 
@@ -226,15 +227,18 @@ def performKNN(formattedProximityMatrix, combinedMatrix, k):
     predictions = []
     posteriorProbabilityA = []
     posteriorProbabilityB = []
-    neighbors = []
     index = 520
 
     while index < len(formattedProximityMatrix):
-        neigbors = getNeighbors(
+        neighbors = []
+        knnIndex = 0
+        neighbors += getNeighbors(
             index, formattedProximityMatrix, combinedMatrix, k)
         KNNStats.append(determineClassStats(neighbors))
-        predictions.append(KNNStats[index][0])
+        #print(len(KNNStats))
+        predictions.append(KNNStats[knnIndex][0])
         index = index + 1
+        knnIndex = knnIndex + 1
 
     percentPredictedBelow50 = getPercentPredicted(predictions, "<=50K")  # p(x)
     percentPredictedAbove50 = getPercentPredicted(predictions, ">50K")
@@ -244,25 +248,49 @@ def performKNN(formattedProximityMatrix, combinedMatrix, k):
 
     counter = 0
     while (counter < len(predictions)):
-        posteriorProbabilityA.append(
-            kNNStats[1] * probPriorsAbove / float(percentPredictedAbove50))
-        posteriorProbabilityB.append(
-            kNNStats[2] * probPriorsBelow / float(percentPredictedBelow50))
-        posteriorProbabilityB.append(
-            kNNStats[2] * probPriorsBelow / float(percentPredictedBelow50))
+        #print(percentPredictedAbove50)
+        #print(percentPredictedBelow50)
+        #print(KNNStats[counter][1])
+        #print(probPriorsAbove)
+        posteriorProbabilityA.append(KNNStats[counter][1] * probPriorsAbove / float(percentPredictedAbove50))
+        #print(KNNStats[1])
+        posteriorProbabilityB.append(KNNStats[counter][2] * probPriorsBelow / float(percentPredictedBelow50))
         counter = counter + 1
 
+    generateOutput(combinedMatrix, predictions, posteriorProbabilityA, posteriorProbabilityB)
 
-def getPriors(formattedProximityMatrix, str):
+    
+
+def generateOutput(combinedMatrix, predictions, posteriorProbabilityA, posteriorProbabilityB):
+    outputMatrix = []
+    idInOutput = 1
+    index = 520
+    while (index < len(combinedMatrix)):
+        outputRow = []
+        posteriorSelection = posteriorProbabilityB
+        outputRow.append(idInOutput)
+        outputRow.append(combinedMatrix[index][15])
+        outputRow.append(predictions[idInOutput - 1]) #this is because idInOutput starts at 1
+        if (predictions[idInOutput - 1] == ">50K"):
+            posteriorSelection = posteriorProbabilityA
+        outputRow.append(posteriorProbabilityA)
+        outputMatrix.append(outputRow)
+    printResults(outputMatrix, "Pleasework.csv")
+
+
+#needs actual percentage of the particular class in Training data
+def getPriors(combinedMatrix, str):
     correct = 0
     total = 0
     index = 520
-    while (index < len(formattedProximityMatrix)):
-        if (formattedProximityMatrix[index] == str):
+    while (index < 808):
+        if (combinedMatrix[index] == str):
             correct = correct + 1
             total = total + 1
         else:
             total = total + 1
+        index = index + 1
+        #print(index)
     return correct / float(total)
 
 
@@ -271,6 +299,9 @@ def getPercentPredicted(predictions, str):
     correct = 0
     index = 0
     while index < len(predictions):
+        print(predictions[index])
+        print(str)
+        print("___")
         if predictions[index] == str:
             correct = correct + 1
             total = total + 1
@@ -285,13 +316,20 @@ def determineClassStats(neighbors):
     below50 = 0
     index = 0
     prediction = "<=50K"
+    #print(len(neighbors))
     while index < len(neighbors):
-        if (neighbors[i][15] == "<=50K"):
+        #print(neighbors[index][15])
+        if (neighbors[index][15] == "<=50K"):
             below50 = below50 + 1
         else:
             above50 = above50 + 1
         predicion = ">50K"
-    if above50 > below50:
+        index = index + 1
+    #print("above 50")
+    #print(above50)
+    #print("below 50")
+    #print(below50)
+    if (above50 > below50):
         predicion = ">50K"
     probA = float(above50) / (float(above50) + float(below50))
     probB = float(below50) / (float(above50) + float(below50))
