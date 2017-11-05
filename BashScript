@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo -e "Please enter the desired amount of records to compare to in proximity measurements (between 0-69): "
+echo -e "Select value for k: "
 read p
-echo "Kicking off our Python program to calculate predictions based on $p nearest neighbors."
+echo "Kicking off our Python program."
 
-python assignment2.py $p
+python assignment5.py $p
