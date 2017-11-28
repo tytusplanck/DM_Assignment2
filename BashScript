@@ -1,0 +1,7 @@
+#!/bin/bash
+
+echo -e "Select value for k: "
+read p
+echo "Kicking off our Python program."
+
+python assignment5.py $p
